@@ -1,0 +1,141 @@
+🔹 FULL PROMPT (Detailed)
+
+I have a Shopify export CSV of my products (BDSM / Knot Knot brand). I need help revising and optimizing the product entries so they sound like a native English speaker wrote them and are SEO-friendly.
+
+What I want:
+
+Clean, community-friendly product titles that use the terms BDSM buyers actually search for (e.g., “St. Andrew’s Cross” instead of “X torture rack,” “Pet Play Coffee Table” instead of “dog bench,” etc.).
+
+Professional product descriptions in Body (HTML) format with:
+
+A short intro sentence (dramatic but clear)
+
+A bullet list of 3–5 features
+
+A safety note where relevant (impact toys, anal toys, etc.)
+
+SEO titles (≤60 characters) and SEO descriptions (≤160 characters) for each product.
+
+Image Alt Texts that are short but descriptive (title + category + “by Knot Knot”).
+
+A review table CSV with: Handle, Proposed Title, Product Type, SEO Title, SEO Description, and Primary Image URL.
+
+A full proposed content CSV with Body HTML and Alt Text included.
+
+A Shopify safe-update CSV that changes only Titles, Body (HTML), SEO fields, and Image Alt Text — no changes to pricing or inventory.
+
+Inputs I’ll provide:
+
+My products_export.csv (Shopify format)
+
+A list of handles + primary image URLs for verification
+
+Outputs I need:
+
+knotknot_review.csv
+
+knotknot_proposed_full.csv
+
+knotknot_safe_update.csv
+
+Extra instructions:
+
+Double-check product categorization against the image URLs.
+
+Rename anything that feels off or not “hip” to the BDSM community.
+
+Keep “Pet Play Coffee Table” as the correct naming.
+
+Start with a subset if needed (10–15 products), and once I confirm the style, apply it to the whole catalog.
+
+
+
+
+
+black-and-red-striped-x-torture-rack: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/IMG_0109_6c6b7281-ba4a-461a-a8f8-3239405ca4a2.jpg?v=1755504808
+black-feather-flirt-stick: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/3004457932_340828440.jpg?v=1754985668
+black-heart-shaped-bondage-handcuffs-training-tied-leg-cuffs: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN014ZUF0H2GnX1L6F5Cg__937849060-0-cib.jpg?v=1754754003
+black-imitation-handcuffs: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01zJQaQ72GnXKhxKq2e__937849060-0-cib_750fd0a3-1deb-405f-8209-f46dcca143cb.jpg?v=1755327896
+black-sponge-velcro-handcuffs-and-leg-cuffs: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/4890874079_340828440.jpg?v=1754804766
+black-x-rack: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01oHUeut20HRoQICbuA__3923156824-0-cib_f461087e-a654-4916-80c3-8222b375e0c7.jpg?v=1755526113
+bondage-vegan-leather-jacket: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/WechatIMG253.png?v=1754294778
+braided-whip-linen: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/12476551291_340828440.jpg?v=1754221116
+candlestick-kneeling-punishment-device: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/7_22588aff-6a21-4c5f-a471-5e47f26b3cbd.jpg?v=1755863361
+cloth-eye-mask: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01W3xLGq2GnX7exb6KV__937849060-0-cib.jpg?v=1755342699
+colorful-fox-with-hooked-tail: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/11470424522_340828440.jpg?v=1755006013
+cross-type-screw-adjustable-nipple-clamp: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/10530771739_340828440.jpg?v=1755007971
+diamond-handle-whip: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01xjl0jU2GnX7SQUhrE__937849060-0-cib.jpg?v=1754218354
+diamond-pattern-bundle-set: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/3546870876_340828440.jpg?v=1754974418
+dog-bone-gag-red: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/222002069.jpg?v=1754294943
+five-piece-leather-hand-and-foot-restraint-whip: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/16318495105_340828440.jpg?v=1754811531
+full-headgear: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/3498256794_340828440.jpg?v=1755340475
+gecko-tail-silone-butt-plug-fluorescent-green: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01L38oBq2GnX3KSHNUY__937849060-0-cib.jpg?v=1754968206
+gecko-tail-silone-butt-plug-red-black: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01OtOPqK2GnX2AfABXs__937849060-0-cib.jpg?v=1754819493
+genuine-leather-black-sponge-handcuffs-and-leg-cuffs-bondage-training-neck-collar-set: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/250000213.jpg?v=1754810572
+golden-feather-dual-purpose-tease: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/11608617204_340828440.jpg?v=1754984227
+gray-feather-stick-flirting: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/2996995948_340828440.jpg?v=1754985309
+gray-ostrich-feather-teaser: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/3608817301_340828440.jpg?v=1754984668
+hanging-handcuff-door-crane: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/3164469223_340828440.jpg?v=1755342040
+headgear-with-mouth-plug: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/4164326943_340828440.jpg?v=1754221652
+heart-shaped-vegan-leather-collar: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/IMG_4665.jpg?v=1754298808
+k9-coffee-table: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01UBiDZH20HRdkfEwvU__3923156824-0-cib.jpg?v=1755863487
+k9-punishment-cage: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/IMG_9149.jpg?v=1755759114
+k9-sleeve: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01CLhNzv2GnX3Tp8SdY__937849060-0-cib.jpg?v=1754212615
+lace-collar-with-leash: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/8283853171_340828440.jpg?v=1754217486
+lace-headband: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01chfbP02GnX7cpW48z__937849060-0-cib.jpg?v=1754317202
+laser-snakeskin-pattern-collar: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/262800156.jpg?v=1754296661
+leather-4-piece-set: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/WechatIMG6636.jpg?v=1754221086
+leather-handcuffs-arm-bondage-straps: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01wCLxUX2GnXGmnnjRu__937849060-0-cib.jpg?v=1755340895
+leather-scissors: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01c5EqqG2GnX5CkreIQ__937849060-0-cib.jpg?v=1755342897
+metal-gag-with-nose-hook: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01fdT88M2GnX2nRQR9X__937849060-0-cib.jpg?v=1755341159
+metal-heart-shaped-rivet-necklace: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/3507252613_340828440.jpg?v=1754981141
+metal-nose-hook-forced-mouth-opening-gag: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01j03Aut2GnXLQrhOK9__937849060-0-cib.jpg?v=1755335039
+multifunctional-body-chair: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/1_bec52e79-581d-4302-bc01-2a6a2a3b1463.jpg?v=1755840035
+natural-wooden-switch-black: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/8405891609_340828440.jpg?v=1754303615
+patent-leather-waterproof-sheets: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01zeCPIn2GnXMQ9LpBL__937849060-0-cib.jpg?v=1755006534
+peacock-feather-tease: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN011sOJd32GnXIHTahbb__937849060-0-cib.jpg?v=1754983533
+pink-heart-shaped-silicone-gag: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/9130727737_340828440.jpg?v=1754751890
+portable-door-hanging-handcuffs-for-bondage-and-restraint: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01jIpK7H2GnX1Uk8gbD__937849060-0-cib.jpg?v=1755353973
+red-heart-shaped-belt-soft-silicone-gag: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/15531441461_340828440.jpg?v=1754753141
+red-lace-elastic-short-plush-eye-mask: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/853136f76f08900f98ce9ffe5462b49e_57ca9eb5-692e-4431-9bb9-298d34916f25.png?v=1754818768
+red-lace-leather-belt-plush-sexy-handcuffs-and-leg-cuffs: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/9357347864_340828440_6e98d3f0-ee9e-44a0-a667-f1be87b8194a.jpg?v=1754814031
+red-leather-heart-whip: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/8987478860_340828440.jpg?v=1754966509
+rose-leather-whip: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01S8Ez0C2GnXLvoQdc5__937849060-0-cib.jpg?v=1754981960
+silicone-crystal-anal-plug: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/4_67d95f53-1023-4237-adaa-26a69ef41ef6.jpg?v=1755783637
+silicone-gag-red: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01IZS6E02GnX7J9JY8i__937849060-0-cib.jpg?v=1754316340
+silicone-gag-with-air-hole: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/8517019171_340828440.jpg?v=1754980515
+simulation-handcuffs: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01AZEngK2GnXOxBvSto__937849060-0-cib.jpg?v=1755327402
+snakeskin-laser-handcuffs-leg-cuffs-collar-and-traction-chain-three-piece-set: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01b6sg8u2GnX7B25E8b__937849060-0-cib.jpg?v=1754977007
+solid-wood-trojan: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01xKhRBi20HRoPCUBQf__3923156824-0-cib.jpg?v=1755833292
+split-leg-restraint: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN013UI4lQ20HRfDrlMKP__3923156824-0-cib.jpg?v=1755768396
+sponge-soft-neck-cover-1: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/IMG_7801.jpg?v=1754296152
+static-tape: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01DUog982GnXJDEmlQW__937849060-0-cib.jpg?v=1754318249
+tassel-mesh-handle-whip: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/9473973782_340828440.jpg?v=1754982593
+training-whip: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/11147442081_340828440.jpg?v=1755326860
+triangle-chair-trojan: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN019u3Gae20HRoPYlQgg__3923156824-0-cib.jpg?v=1755761024
+triangle-trojan: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/6_b46cc373-4120-4612-aa18-627e7e20a6c8.jpg?v=1755768141
+trojans: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01D6Mkqa20HRfFh1Yri__3923156824-0-cib.jpg?v=1755768657
+trojans-1: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN010Avslt20HRfFMpSN4__3923156824-0-cib.jpg?v=1755840533
+trojans-2: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/10_39a63ca5-cfb4-435f-9f31-1dc861ba2c6e.jpg?v=1755855925
+vacuum-breast-pump-rotator: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/11477355044_340828440.jpg?v=1755331721
+vegan-leather-bondage-vest-2: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/30A12002G1.jpg?v=1754381163
+vegan-leather-crop-black: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/29092406B.jpg?v=1754305888
+vegan-leather-double-strap-dondage-vest: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/302400295.jpg?v=1754383947
+vegan-leather-rivet-headband: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/3088189200_340828440.jpg?v=1754320087
+vegan-leather-trimmed-collar-with-chain: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/IMG_4689.jpg?v=1754295789
+x-rack: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01X4Zgt420HRf6n6ac8__3923156824-0-cib_520fc488-87bc-4c69-b9bb-8f7a94292c40.jpg?v=1755780013
+
+
+
+black-and-red-striped-x-torture-rack: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/IMG_0109_6c6b7281-ba4a-461a-a8f8-3239405ca4a2.jpg?v=1755504808
+black-feather-flirt-stick: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/3004457932_340828440.jpg?v=1754985668
+black-heart-shaped-bondage-handcuffs-training-tied-leg-cuffs: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN014ZUF0H2GnX1L6F5Cg__937849060-0-cib.jpg?v=1754754003
+black-imitation-handcuffs: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01zJQaQ72GnXKhxKq2e__937849060-0-cib_750fd0a3-1deb-405f-8209-f46dcca143cb.jpg?v=1755327896
+black-sponge-velcro-handcuffs-and-leg-cuffs: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/4890874079_340828440.jpg?v=1754804766
+black-x-rack: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01oHUeut20HRoQICbuA__3923156824-0-cib_f461087e-a654-4916-80c3-8222b375e0c7.jpg?v=1755526113
+bondage-vegan-leather-jacket: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/WechatIMG253.png?v=1754294778
+braided-whip-linen: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/12476551291_340828440.jpg?v=1754221116
+candlestick-kneeling-punishment-device: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/7_22588aff-6a21-4c5f-a471-5e47f26b3cbd.jpg?v=1755863361
+cloth-eye-mask: https://cdn.shopify.com/s/files/1/0716/4844/4554/files/O1CN01W3xLGq2GnX7exb6KV__937849060-0-cib.jpg?v=1755342699
+
+

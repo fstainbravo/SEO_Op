@@ -10,3 +10,7 @@ python csv_seo_knotknot.py \
 
 
 python csv_seo_knotknot.py --input products_export.csv --verbose --output-dir ./out --limit 10 --model gpt-4o-mini 
+
+
+
+There you go
