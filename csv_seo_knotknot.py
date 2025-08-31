@@ -70,6 +70,9 @@ MAX_SEO_TITLE = 60
 MAX_SEO_DESC = 160
 MAX_IMAGES_TO_SEND = 3  # primary + a couple more to ground the model visually
 MAX_PRODUCT_TITLE = 80  # keep internal product titles concise and specific
+REVERSE_SEARCH_PROVIDER = os.getenv("REVERSE_SEARCH_PROVIDER", "bing").strip().lower()  # bing | serpapi (lens)
+BING_VISUAL_KEY = os.getenv("BING_VISUAL_SEARCH_KEY", "").strip() or os.getenv("BING_SEARCH_V7_SUBSCRIPTION_KEY", "").strip()
+SERPAPI_KEY = os.getenv("SERPAPI_API_KEY", "").strip()  # optional: for Google Lens via SerpAPI
 
 # Conservative keyword → product type mapping (fallback if model omits)
 KEYWORD_TO_TYPE = [
@@ -324,12 +327,15 @@ def _replace_accessory_with_specific(
         vg = (visual_hint.get("visual_guess_title") or "").strip()
         vc = (visual_hint.get("visual_category") or "").strip()
         vterms = visual_hint.get("visual_terms") or []
+        extern = visual_hint.get("external_candidates") or []
         if vg:
             candidate_specific = vg
         elif vc:
             candidate_specific = vc
         elif isinstance(vterms, list) and vterms:
             candidate_specific = str(vterms[0]).strip()
+        elif isinstance(extern, list) and extern:
+            candidate_specific = str(extern[0]).strip()
 
     if not candidate_specific:
         candidate_specific = _infer_title_from_image_and_type(product_payload, product_type)
@@ -489,6 +495,134 @@ def build_messages_visual(product_payload: Dict[str, Any]) -> List[Dict[str, Any
 
     user_msg = {"role": "user", "content": parts}
     return [sys_msg, user_msg]
+
+def _domain_from_url(u: str) -> Optional[str]:
+    try:
+        return urlparse(u).netloc
+    except Exception:
+        return None
+
+def reverse_image_search_bing(image_url: str, timeout: int = 25) -> List[Dict[str, Any]]:
+    """Query Bing Visual Search for visually similar images and products.
+    Returns a list of {title, url, site} dicts.
+    """
+    if not BING_VISUAL_KEY:
+        return []
+
+    endpoint = "https://api.bing.microsoft.com/v7.0/images/visualsearch"
+    headers = {"Ocp-Apim-Subscription-Key": BING_VISUAL_KEY}
+    params = {"imgUrl": image_url}
+    try:
+        resp = requests.get(endpoint, headers=headers, params=params, timeout=timeout)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception:
+        return []
+
+    results: List[Dict[str, Any]] = []
+
+    def push(title: Optional[str], url: Optional[str]):
+        if not url:
+            return
+        site = _domain_from_url(url) or ""
+        t = (title or "").strip()
+        if not t:
+            t = site or url
+        results.append({"title": t, "url": url, "site": site})
+
+    # The response contains tags -> actions -> data/value structures. Extract generously.
+    for tag in (data.get("tags") or []):
+        for act in (tag.get("actions") or []):
+            atype = (act.get("actionType") or "").lower()
+            # Common action buckets that include similar images and shopping results
+            if atype in ("visualsearch", "similarimages", "pagesincluding", "productscopedentities", "shoplookalikes"):
+                # 'data' may have 'value' list
+                val = act.get("data", {}).get("value") if isinstance(act.get("data"), dict) else None
+                if isinstance(val, list):
+                    for v in val:
+                        push(v.get("name") or v.get("title"), v.get("hostPageUrl") or v.get("contentUrl"))
+                # Some actions provide top-level 'value'
+                elif isinstance(act.get("value"), list):
+                    for v in act.get("value"):
+                        push(v.get("name") or v.get("title"), v.get("hostPageUrl") or v.get("contentUrl"))
+
+    # Deduplicate by (title, site)
+    seen = set()
+    uniq: List[Dict[str, Any]] = []
+    for r in results:
+        key = (r.get("title"), r.get("site"))
+        if key in seen:
+            continue
+        seen.add(key)
+        uniq.append(r)
+    return uniq[:10]
+
+def reverse_image_search_serpapi(image_url: str, timeout: int = 25) -> List[Dict[str, Any]]:
+    """Optional: Use SerpAPI's Google Lens endpoint. Requires SERPAPI_API_KEY.
+    Returns a list of {title, url, site} dicts.
+    """
+    if not SERPAPI_KEY:
+        return []
+    try:
+        # SerpAPI lens endpoint
+        endpoint = "https://serpapi.com/search.json"
+        params = {
+            "engine": "google_lens",
+            "url": image_url,
+            "api_key": SERPAPI_KEY,
+        }
+        resp = requests.get(endpoint, params=params, timeout=timeout)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception:
+        return []
+
+    items = []
+    for s in (data.get("visual_matches") or []):
+        title = s.get("title") or s.get("source_title")
+        url = s.get("link") or s.get("source")
+        if url:
+            items.append({"title": (title or "").strip() or _domain_from_url(url) or url, "url": url, "site": _domain_from_url(url) or ""})
+    return items[:10]
+
+def reverse_image_search(image_url: Optional[str]) -> Dict[str, Any]:
+    """High-level entry. Chooses provider and returns a hint dict suitable for build_messages()."""
+    if not image_url:
+        return {}
+    providers: List[str] = []
+    if REVERSE_SEARCH_PROVIDER == "serpapi" and SERPAPI_KEY:
+        providers = ["serpapi", "bing"]  # try lens then bing
+    else:
+        providers = ["bing", "serpapi"]
+
+    all_items: List[Dict[str, Any]] = []
+    for p in providers:
+        try:
+            if p == "bing" and BING_VISUAL_KEY:
+                all_items = reverse_image_search_bing(image_url)
+            elif p == "serpapi" and SERPAPI_KEY:
+                all_items = reverse_image_search_serpapi(image_url)
+        except Exception:
+            all_items = []
+        if all_items:
+            break
+
+    # Summarize titles and sites
+    titles = [i.get("title") for i in all_items if i.get("title")]
+    sites = [i.get("site") for i in all_items if i.get("site")]
+    # Pick top 3 candidate names by frequency
+    title_counts: Dict[str, int] = {}
+    for t in titles:
+        title_counts[t] = title_counts.get(t, 0) + 1
+    top_titles = sorted(title_counts.items(), key=lambda kv: (-kv[1], kv[0]))[:3]
+    candidates = [t for t, _ in top_titles] or titles[:3]
+
+    return {
+        "external_candidates": candidates,
+        "external_sites": sites[:10],
+        "external_examples": all_items[:5],
+        "provider": REVERSE_SEARCH_PROVIDER,
+    }
 
 def call_openai_chat(messages: List[Dict[str, Any]], model: str, temperature: float = 0.2, retries: int = 3, timeout: int = 60) -> Dict[str, Any]:
     """
@@ -658,6 +792,7 @@ def process_catalog(
     temperature: float,
     confirm_renames: bool,
     visual_first: bool,
+    reverse_search: bool,
     verbose: bool,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
@@ -704,6 +839,24 @@ def process_catalog(
                     print("  visual_hint:", json.dumps(visual_hint, ensure_ascii=False))
                 else:
                     print("  visual_hint: <none>")
+
+        # Optional: reverse image search against the web to mine titles from other stores
+        if reverse_search:
+            primary_img = product_payload.get("primary_image") or (product_payload.get("images") or [None])[0]
+            rev = reverse_image_search(primary_img)
+            if rev:
+                if visual_hint:
+                    # merge without clobbering existing keys
+                    for k, v in rev.items():
+                        if k not in visual_hint:
+                            visual_hint[k] = v
+                else:
+                    visual_hint = rev
+            if verbose:
+                if rev and rev.get("external_candidates"):
+                    print("  reverse_candidates:", ", ".join(rev.get("external_candidates") or []))
+                else:
+                    print("  reverse_candidates: <none>")
 
         # Build messages & call model
         messages = build_messages(product_payload, visual_hint=visual_hint)
@@ -887,6 +1040,7 @@ def main():
     parser.add_argument("--temperature", type=float, default=DEFAULT_TEMPERATURE, help="Model temperature (default: 0.2)")
     parser.add_argument("--confirm-renames", action="store_true", help="Prompt to approve or edit proposed title changes")
     parser.add_argument("--visual-first", action="store_true", help="Analyze images first and feed results into naming to avoid generic/wrong titles")
+    parser.add_argument("--reverse-search", action="store_true", help="Use reverse image search (Bing or SerpAPI) to compare photos against the web and mine candidate names")
     parser.add_argument("--verbose", action="store_true", help="Print detailed progress and decisions per product")
     args = parser.parse_args()
 
@@ -919,6 +1073,7 @@ def main():
         temperature=args.temperature,
         confirm_renames=args.confirm_renames,
         visual_first=args.visual_first,
+        reverse_search=args.reverse_search,
         verbose=args.verbose,
     )
 
