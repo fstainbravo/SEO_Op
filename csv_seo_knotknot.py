@@ -69,6 +69,7 @@ MAX_ALT_TEXT_LEN = 125
 MAX_SEO_TITLE = 60
 MAX_SEO_DESC = 160
 MAX_IMAGES_TO_SEND = 3  # primary + a couple more to ground the model visually
+MAX_PRODUCT_TITLE = 80  # keep internal product titles concise and specific
 
 # Conservative keyword → product type mapping (fallback if model omits)
 KEYWORD_TO_TYPE = [
@@ -235,10 +236,11 @@ def _infer_title_from_image_and_type(product_payload: Dict[str, Any], product_ty
     if has("cage") and has("chastity"):
         return "Chastity Cage"
 
-    # Fall back to product_type or a generic safe name
+    # Fall back to product_type or original title/handle; avoid vague generic nouns
     if product_type and isinstance(product_type, str) and product_type.strip():
         return product_type.strip()
-    return "BDSM Accessory"
+    fallback_title = (product_payload.get("title") or (product_payload.get("handle") or "").replace("-", " ").title()).strip()
+    return fallback_title
 
 
 def _prompt_approve_rename(handle: str, original: str, proposed: str, reason: Optional[str] = None) -> Tuple[str, bool]:
@@ -298,6 +300,83 @@ def _select_image_urls(product_payload: Dict[str, Any], max_images: int = MAX_IM
             ordered.append(u)
     return ordered[:max_images]
 
+def _replace_accessory_with_specific(
+    title: str,
+    product_payload: Dict[str, Any],
+    product_type: Optional[str],
+    visual_hint: Optional[Dict[str, Any]] = None,
+) -> str:
+    """
+    Replace vague 'Accessory/Accessories' tokens when we can infer a specific noun from:
+    - visual_hint (visual_guess_title or visual_category/terms), or
+    - image URL/token heuristic via _infer_title_from_image_and_type, or
+    - product_type.
+    If we cannot infer a specific noun, do NOT replace; leave the title unchanged.
+    """
+    if not isinstance(title, str) or not title.strip():
+        return title
+
+    original = title
+
+    # Preferred specific replacement candidates
+    candidate_specific = None
+    if visual_hint and isinstance(visual_hint, dict):
+        vg = (visual_hint.get("visual_guess_title") or "").strip()
+        vc = (visual_hint.get("visual_category") or "").strip()
+        vterms = visual_hint.get("visual_terms") or []
+        if vg:
+            candidate_specific = vg
+        elif vc:
+            candidate_specific = vc
+        elif isinstance(vterms, list) and vterms:
+            candidate_specific = str(vterms[0]).strip()
+
+    if not candidate_specific:
+        candidate_specific = _infer_title_from_image_and_type(product_payload, product_type)
+
+    # Validate candidate is not a generic term
+    bad_terms = {"accessory", "accessories", "gear", "bondage", "bondage gear", "adult toy", "toy"}
+    if candidate_specific and candidate_specific.strip().lower() in bad_terms:
+        candidate_specific = None
+
+    # Consider CSV product_type if it looks specific and we still lack a candidate
+    if not candidate_specific and product_type and str(product_type).strip().lower() not in bad_terms:
+        candidate_specific = str(product_type).strip()
+
+    # Replace standalone Accessory/Accessories tokens
+    def replacer(match: re.Match) -> str:
+        return candidate_specific if candidate_specific else match.group(0)
+
+    cleaned = re.sub(r"(?i)\bAccessories\b", replacer, original)
+    cleaned = re.sub(r"(?i)\bAccessory\b", replacer, cleaned)
+
+    # If we couldn't infer a specific noun, leave as-is
+    if not candidate_specific:
+        return original
+
+    # Tidy punctuation/spacing
+    cleaned = re.sub(r"\s{2,}", " ", cleaned).strip()
+    cleaned = re.sub(r"\s*([:;\-–—])\s*", r" \1 ", cleaned)
+    cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" -–—:")
+
+    # Avoid duplicating the exact same word back-to-back
+    cleaned = re.sub(r"\b(\w+)\b\s+\1\b", r"\1", cleaned, flags=re.IGNORECASE)
+
+    return cleaned
+
+def _build_seo_title_from(proposed_title: str) -> str:
+    """Template the SEO title: prefer 'Title | Brand' within 60 chars."""
+    base = (proposed_title or "").strip()
+    if not base:
+        return base
+    # Try to include brand if it fits comfortably
+    sep = " | "
+    with_brand = f"{base}{sep}{BRAND_NAME}"
+    if len(with_brand) <= MAX_SEO_TITLE:
+        return with_brand
+    # Otherwise, return the clamped base
+    return clamp(base, MAX_SEO_TITLE)
+
 
 def build_messages(product_payload: Dict[str, Any], visual_hint: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     """
@@ -313,6 +392,7 @@ def build_messages(product_payload: Dict[str, Any], visual_hint: Optional[Dict[s
             "Do not prepend or overuse the literal word 'BDSM' in titles; prefer natural community terms like 'bondage', 'gag', 'cross', etc., when relevant. "
             "Avoid repetitive phrasing across items and keep names natural to the scene. "
             "Use terminology BDSM buyers search for. "
+            "Never use generic words like 'Accessory' or 'Accessories' in titles; choose a concrete product noun (e.g., 'Flogger', 'Collar', 'Spread Bar'). "
             "Do NOT invent specs (no new dimensions, materials, certifications). "
             "If the source content lacks details, keep copy high-level and honest. "
             "Include a safety note when relevant (impact toys, anal toys, etc.). "
@@ -356,7 +436,8 @@ def build_messages(product_payload: Dict[str, Any], visual_hint: Optional[Dict[s
         "naming_goals": [
             "Encourage varied naming; avoid repeating the same root words across items.",
             "Keep titles specific enough to communicate use without inventing specs.",
-            "Align with search behavior and community terminology."
+            "Align with search behavior and community terminology.",
+            "Avoid vague terms like 'Accessory'; always specify the product type."
         ]
     }
 
@@ -468,6 +549,13 @@ def conservative_rule_based(product_payload: Dict[str, Any]) -> Dict[str, Any]:
     handle = product_payload.get("handle") or ""
     title_raw = product_payload.get("title") or handle.replace("-", " ").title()
     title = flexible_bdsmlanguage(title_raw)
+    # Also demote 'Accessory' in fallback titles using image/type inference
+    title = _replace_accessory_with_specific(
+        title,
+        product_payload={},  # minimal context here; images added below
+        product_type=None,
+        visual_hint=None,
+    )
 
     # SEO Title: clamp to 60; prefer title
     seo_title = clamp(title, MAX_SEO_TITLE)
@@ -499,7 +587,13 @@ def conservative_rule_based(product_payload: Dict[str, Any]) -> Dict[str, Any]:
     combined = " ".join([
         title_raw or "", product_payload.get("type") or "", product_payload.get("category") or "", handle
     ])
-    ptype = guess_product_type(combined) or "Accessories"
+    # Prefer a specific product type; avoid the vague 'Accessories'
+    ptype = guess_product_type(combined)
+    if not ptype:
+        # Try infer from images
+        ptype = _infer_title_from_image_and_type(product_payload, None)
+    if not ptype:
+        ptype = "Bondage"
 
     # Alt texts
     alts = []
@@ -663,16 +757,27 @@ def process_catalog(
 
         # Strip 'BDSM' tokens to avoid literal use in titles
         proposed_title = _strip_bdsm_tokens(proposed_title)
+        # Replace vague 'Accessory/Accessories' with specific noun using visuals and type
+        proposed_title = _replace_accessory_with_specific(
+            proposed_title,
+            product_payload=product_payload,
+            product_type=(model_json.get("product_type") or product_payload.get("type")),
+            visual_hint=visual_hint,
+        )
+        # Keep product title focused and readable
+        proposed_title = clamp(proposed_title, MAX_PRODUCT_TITLE)
         if verbose:
             print(f"  title_final='{proposed_title}'")
 
+        # Prefer a specific product type; avoid vague fallbacks
         product_type = model_json.get("product_type") or guess_product_type(
             " ".join([proposed_title, product_payload.get("type") or "", product_payload.get("category") or ""])
-        ) or "Accessories"
+        ) or _infer_title_from_image_and_type(product_payload, None) or ""
         if verbose:
             print(f"  product_type='{product_type}'")
 
-        seo_title = clamp(model_json.get("seo_title") or proposed_title, MAX_SEO_TITLE)
+        # Build SEO title with a consistent template and length
+        seo_title = _build_seo_title_from(model_json.get("seo_title") or proposed_title)
         seo_description = clamp(model_json.get("seo_description") or f"{proposed_title} by {BRAND_NAME}.", MAX_SEO_DESC)
         body_html = model_json.get("body_html") or ""
 
